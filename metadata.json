@@ -1,0 +1,7 @@
+{
+  "name": "NutriScan",
+  "description": "AI-powered nutrition scanner and meal tracker with real-time food recognition and macro analysis.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
