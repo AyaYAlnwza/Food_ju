@@ -1,6 +1,7 @@
 import React from 'react';
 import { Home, History, Camera, BarChart3, User } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useLanguage } from '../lib/LanguageContext';
 
 interface BottomNavProps {
   activeTab: string;
@@ -8,12 +9,14 @@ interface BottomNavProps {
 }
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
+  const { t } = useLanguage();
+
   const tabs = [
-    { id: 'home', label: 'หน้าหลัก', icon: Home },
-    { id: 'scan', label: 'สแกน', icon: Camera, isCenter: true },
-    { id: 'history', label: 'ประวัติ', icon: History },
-    { id: 'stats', label: 'สถิติ', icon: BarChart3 },
-    { id: 'profile', label: 'โปรไฟล์', icon: User },
+    { id: 'home', label: t('nav_home'), icon: Home },
+    { id: 'scan', label: t('nav_scan'), icon: Camera, isCenter: true },
+    { id: 'history', label: t('nav_history'), icon: History },
+    { id: 'stats', label: t('nav_stats'), icon: BarChart3 },
+    { id: 'profile', label: t('nav_profile'), icon: User },
   ];
 
   return (

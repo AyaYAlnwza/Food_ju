@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Share2, Plus, ArrowLeft, Zap, Settings } from 'lucide-react';
 import { useNutrition } from '../lib/NutritionContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { Meal } from '../types';
 
 interface ScanResultProps {
@@ -12,6 +13,7 @@ interface ScanResultProps {
 
 export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) => {
   const { addMeal } = useNutrition();
+  const { t } = useLanguage();
 
   const handleLogClick = () => {
     if (data) {
@@ -24,7 +26,7 @@ export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) =
 
       const newMeal: Meal = {
         id: Date.now().toString(),
-        name: data.name || 'อาหารที่ไม่ระบุ',
+        name: data.name || t('unknown_food'),
         calories: data.calories || 0,
         protein: data.protein || 0,
         carbs: data.carbs || 0,
@@ -39,7 +41,7 @@ export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) =
     onLog();
   };
 
-  const name = data?.name || 'กำลังโหลด...';
+  const name = data?.name || t('loading');
   const calories = data?.calories || 0;
   const protein = data?.protein || 0;
   const carbs = data?.carbs || 0;
@@ -90,22 +92,22 @@ export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) =
 
         <div className="flex items-center justify-center gap-2 text-[#FF6B00] text-xs font-black tracking-widest uppercase mb-2">
           <CheckCircle2 className="w-4 h-4" />
-          ยืนยันการค้นพบ
+          {t('confirm_discovery')}
         </div>
 
         <h2 className="text-3xl font-bold text-center mb-2">{name}</h2>
 
         <div className="flex items-baseline justify-center gap-2 mb-10">
           <span className="text-7xl font-black">{calories}</span>
-          <span className="text-[#FF6B00] font-bold text-xl">แคลอรี</span>
+          <span className="text-[#FF6B00] font-bold text-xl">{t('calories')}</span>
         </div>
 
         {/* Macros */}
         <div className="grid grid-cols-3 gap-4 mb-10">
           {[
-            { label: 'โปรตีน', value: `${protein}ก`, color: '#FF4E00', percent: proteinPercent },
-            { label: 'คาร์บ', value: `${carbs}ก`, color: '#FBBF24', percent: carbsPercent },
-            { label: 'ไขมัน', value: `${fat}ก`, color: '#EF4444', percent: fatPercent },
+            { label: t('protein'), value: `${protein}ก`, color: '#FF4E00', percent: proteinPercent },
+            { label: t('carbs_short'), value: `${carbs}ก`, color: '#FBBF24', percent: carbsPercent },
+            { label: t('fat'), value: `${fat}ก`, color: '#EF4444', percent: fatPercent },
           ].map((macro) => (
             <div key={macro.label} className="bg-white/5 rounded-3xl p-4 flex flex-col items-center">
               <span className="text-lg font-bold mb-1" style={{ color: macro.color }}>{macro.value}</span>
@@ -127,7 +129,7 @@ export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) =
             className="flex-1 bg-[#FF6B00] text-white h-16 rounded-2xl flex items-center justify-center gap-2 font-bold text-lg shadow-[0_0_20px_rgba(255,107,0,0.3)] active:scale-95 transition-transform"
           >
             <Plus className="w-6 h-6" />
-            เพิ่มลงบันทึกวันนี้
+            {t('add_to_diary')}
           </button>
           <button className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 active:scale-95 transition-transform">
             <Share2 className="w-6 h-6" />

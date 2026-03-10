@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 // Initialize the Gemini client using the environment variable exposed by Vite
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export async function analyzeFoodImage(base64Image: string) {
+export async function analyzeFoodImage(base64Image: string, language: string = 'en') {
     try {
         // We expect the base64 string without the data URL prefix if possible,
         // or we'll clean it up if it has one.
@@ -15,7 +15,7 @@ export async function analyzeFoodImage(base64Image: string) {
                 {
                     role: 'user',
                     parts: [
-                        { text: 'Analyze this image and identify the food. Estimate its nutritional value. Return ONLY a valid JSON object with the following structure: { "name": "Food Name", "calories": 500, "protein": 20, "carbs": 50, "fat": 15, "tags": ["HIGH PROTEIN", "HEALTHY"] }. The tags should be 1-3 short uppercase strings classifying the food. Do not include any other text or markdown block markers.' },
+                        { text: `Analyze this image and identify the food. Estimate its nutritional value. Return ONLY a valid JSON object with the following structure: { "name": "Food Name in ${language === 'th' ? 'Thai' : 'English'}", "calories": 500, "protein": 20, "carbs": 50, "fat": 15, "tags": ["HIGH PROTEIN", "HEALTHY"] }. The tags should be 1-3 short uppercase strings classifying the food in ${language === 'th' ? 'Thai' : 'English'}. Do not include any other text or markdown block markers.` },
                         { inlineData: { data: cleanBase64, mimeType: 'image/jpeg' } }
                     ]
                 }

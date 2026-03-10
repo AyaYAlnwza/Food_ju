@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useNutrition } from '../lib/NutritionContext';
+import { useLanguage } from '../lib/LanguageContext';
 import { UserProfile } from '../types';
 
 interface OnboardingViewProps {
@@ -10,6 +11,7 @@ interface OnboardingViewProps {
 
 export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) => {
     const { updateUserProfile } = useNutrition();
+    const { t } = useLanguage();
     const [step, setStep] = useState(1);
 
     const [profile, setProfile] = useState<Partial<UserProfile>>({
@@ -70,12 +72,12 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                     {step === 1 && (
                         <div className="space-y-6">
                             <div>
-                                <h1 className="text-3xl font-black text-gray-900 mb-2">Let's get to know you.</h1>
-                                <p className="text-gray-500 font-medium">This helps us personalize your calorie and macro goals.</p>
+                                <h1 className="text-3xl font-black text-gray-900 mb-2">{t('onboarding_1_title')}</h1>
+                                <p className="text-gray-500 font-medium">{t('onboarding_1_sub')}</p>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Your Name</label>
+                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('your_name')}</label>
                                 <input
                                     type="text"
                                     value={profile.name}
@@ -86,18 +88,18 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Biological Sex</label>
+                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('biological_sex')}</label>
                                 <div className="grid grid-cols-2 gap-4">
                                     {(['male', 'female'] as const).map(g => (
                                         <button
                                             key={g}
                                             onClick={() => setProfile({ ...profile, gender: g })}
                                             className={`p-4 rounded-2xl border-2 font-bold capitalize transition-colors ${profile.gender === g
-                                                    ? 'border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00]'
-                                                    : 'border-white bg-white text-gray-400 hover:border-gray-50'
+                                                ? 'border-[#FF6B00] bg-[#FF6B00]/5 text-[#FF6B00]'
+                                                : 'border-white bg-white text-gray-400 hover:border-gray-50'
                                                 }`}
                                         >
-                                            {g}
+                                            {t(g)}
                                         </button>
                                     ))}
                                 </div>
@@ -108,13 +110,13 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                     {step === 2 && (
                         <div className="space-y-6">
                             <div>
-                                <h1 className="text-3xl font-black text-gray-900 mb-2">Your measurements?</h1>
-                                <p className="text-gray-500 font-medium">Used for TDEE (Total Daily Energy Expenditure) calculation.</p>
+                                <h1 className="text-3xl font-black text-gray-900 mb-2">{t('onboarding_2_title')}</h1>
+                                <p className="text-gray-500 font-medium">{t('onboarding_2_sub')}</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Age</label>
+                                    <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('age')}</label>
                                     <div className="relative">
                                         <input
                                             type="number"
@@ -122,12 +124,12 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                                             onChange={e => setProfile({ ...profile, age: Number(e.target.value) })}
                                             className="w-full bg-white border border-gray-100 rounded-2xl p-4 font-bold text-gray-900 focus:outline-none focus:border-[#FF6B00]"
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">yrs</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">{t('yrs')}</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Height</label>
+                                    <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('height')}</label>
                                     <div className="relative">
                                         <input
                                             type="number"
@@ -135,13 +137,13 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                                             onChange={e => setProfile({ ...profile, heightCm: Number(e.target.value) })}
                                             className="w-full bg-white border border-gray-100 rounded-2xl p-4 font-bold text-gray-900 focus:outline-none focus:border-[#FF6B00]"
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">cm</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">{t('cm')}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Weight</label>
+                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('weight')}</label>
                                 <div className="relative">
                                     <input
                                         type="number"
@@ -149,7 +151,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                                         onChange={e => setProfile({ ...profile, weightKg: Number(e.target.value) })}
                                         className="w-full bg-white border border-gray-100 rounded-2xl p-4 font-bold text-gray-900 focus:outline-none focus:border-[#FF6B00]"
                                     />
-                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">kg</span>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">{t('kg')}</span>
                                 </div>
                             </div>
                         </div>
@@ -158,24 +160,24 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                     {step === 3 && (
                         <div className="space-y-6">
                             <div>
-                                <h1 className="text-3xl font-black text-gray-900 mb-2">What is your goal?</h1>
-                                <p className="text-gray-500 font-medium">We'll adjust your daily intake target accordingly.</p>
+                                <h1 className="text-3xl font-black text-gray-900 mb-2">{t('onboarding_3_title')}</h1>
+                                <p className="text-gray-500 font-medium">{t('onboarding_3_sub')}</p>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">Goal</label>
+                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase">{t('goal')}</label>
                                 <div className="space-y-3">
                                     {[
-                                        { val: 'lose', label: 'Lose Weight', sub: '-500 kcal/day' },
-                                        { val: 'maintain', label: 'Maintain Weight', sub: 'Calculated TDEE' },
-                                        { val: 'gain', label: 'Build Muscle', sub: '+500 kcal/day' }
+                                        { val: 'lose', label: t('lose_weight'), sub: '-500 kcal/day' },
+                                        { val: 'maintain', label: t('maintain_weight'), sub: 'Calculated TDEE' },
+                                        { val: 'gain', label: t('gain_muscle'), sub: '+500 kcal/day' }
                                     ].map(g => (
                                         <button
                                             key={g.val}
                                             onClick={() => setProfile({ ...profile, goal: g.val as any })}
                                             className={`w-full p-4 rounded-2xl border-2 text-left flex justify-between items-center transition-colors ${profile.goal === g.val
-                                                    ? 'border-[#FF6B00] bg-[#FF6B00]/5'
-                                                    : 'border-white bg-white hover:border-gray-50'
+                                                ? 'border-[#FF6B00] bg-[#FF6B00]/5'
+                                                : 'border-white bg-white hover:border-gray-50'
                                                 }`}
                                         >
                                             <div>
@@ -191,17 +193,17 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase mt-4 block">Activity Level</label>
+                                <label className="text-xs font-black tracking-widest text-gray-400 uppercase mt-4 block">{t('activity_level')}</label>
                                 <select
                                     value={profile.activityLevel}
                                     onChange={(e) => setProfile({ ...profile, activityLevel: e.target.value as any })}
                                     className="w-full bg-white border border-gray-100 rounded-2xl p-4 font-bold text-gray-900 focus:outline-none focus:border-[#FF6B00]"
                                 >
-                                    <option value="sedentary">Sedentary (Little/no exercise)</option>
-                                    <option value="lightly_active">Lightly Active (1-3 days/week)</option>
-                                    <option value="moderately_active">Moderately Active (3-5 days/week)</option>
-                                    <option value="very_active">Very Active (6-7 days/week)</option>
-                                    <option value="super_active">Super Active (Physical job/training)</option>
+                                    <option value="sedentary">{t('sedentary_desc')}</option>
+                                    <option value="lightly_active">{t('lightly_active_desc')}</option>
+                                    <option value="moderately_active">{t('moderately_active_desc')}</option>
+                                    <option value="very_active">{t('very_active_desc')}</option>
+                                    <option value="super_active">{t('super_active_desc')}</option>
                                 </select>
                             </div>
                         </div>
@@ -210,13 +212,13 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
             </AnimatePresence>
 
             <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between z-20">
-                <button className="text-gray-400 font-bold text-sm px-4">Skip</button>
+                <button className="text-gray-400 font-bold text-sm px-4">{t('skip')}</button>
                 <button
                     onClick={handleNext}
                     disabled={step === 1 && !profile.name}
                     className="bg-[#FF6B00] text-white px-8 h-14 rounded-full font-bold shadow-lg shadow-[#FF6B00]/30 flex items-center gap-2 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                 >
-                    {step === 3 ? 'Finish' : 'Next'}
+                    {step === 3 ? t('finish') : t('next')}
                     <ArrowRight className="w-5 h-5" />
                 </button>
             </div>

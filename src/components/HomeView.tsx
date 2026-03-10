@@ -1,9 +1,11 @@
 import React from 'react';
 import { Menu, Camera, ChevronRight, LayoutGrid } from 'lucide-react';
 import { useNutrition } from '../lib/NutritionContext';
+import { useLanguage } from '../lib/LanguageContext';
 
 export const HomeView: React.FC = () => {
   const { meals, dailyGoal } = useNutrition();
+  const { t } = useLanguage();
 
   const today = new Date().toLocaleDateString();
   const todaysMeals = meals.filter(meal => new Date(meal.timestamp).toLocaleDateString() === today);
@@ -24,14 +26,8 @@ export const HomeView: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-24">
       {/* Header */}
-      <div className="px-6 pt-12 pb-6 flex items-center justify-between">
-        <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-100">
-          <Menu className="w-5 h-5 text-gray-900" />
-        </button>
+      <div className="px-6 pt-12 pb-6 flex items-center justify-center">
         <h1 className="text-xl font-bold text-gray-900">NutriScan</h1>
-        <button className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm border border-gray-100">
-          <LayoutGrid className="w-5 h-5 text-gray-900" />
-        </button>
       </div>
 
       <div className="px-6">
@@ -62,31 +58,31 @@ export const HomeView: React.FC = () => {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xs font-black tracking-widest text-gray-400 uppercase mb-1">เหลืออีก</span>
+              <span className="text-xs font-black tracking-widest text-gray-400 uppercase mb-1">{t('left')}</span>
               <span className="text-5xl font-black text-gray-900">{caloriesLeft.toLocaleString()}</span>
-              <span className="text-xl font-bold text-[#FF6B00]">แคลอรี</span>
+              <span className="text-xl font-bold text-[#FF6B00]">{t('calories')}</span>
             </div>
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400 font-medium mb-2">เป้าหมายรายวัน: <span className="text-gray-900 font-bold">{dailyGoal.toLocaleString()} แคลอรี</span></p>
+            <p className="text-gray-400 font-medium mb-2">{t('daily_goal')} <span className="text-gray-900 font-bold">{dailyGoal.toLocaleString()} {t('calories')}</span></p>
             <span className="bg-[#FF6B00]/10 text-[#FF6B00] px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase">
-              เป้าหมายที่ถึง {caloriePercent}%
+              {t('goal_reached')} {caloriePercent}%
             </span>
           </div>
         </div>
 
         {/* Daily Macros */}
         <div className="flex justify-between items-center mb-4 mt-8">
-          <h2 className="text-lg font-bold text-gray-900">สารอาหารประจำวัน</h2>
-          <button className="text-[#FF6B00] text-sm font-bold">รายละเอียด</button>
+          <h2 className="text-lg font-bold text-gray-900">{t('daily_macros')}</h2>
+          <button className="text-[#FF6B00] text-sm font-bold">{t('details')}</button>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'โปรตีน', value: `${Math.round(totalProtein)}ก/${goalProtein}ก`, color: '#FF4E00', icon: '🍴', percent: Math.min(100, (totalProtein / goalProtein) * 100) || 0 },
-            { label: 'คาร์โบไฮเดรต', value: `${Math.round(totalCarbs)}ก/${goalCarbs}ก`, color: '#FBBF24', icon: '🧬', percent: Math.min(100, (totalCarbs / goalCarbs) * 100) || 0 },
-            { label: 'ไขมัน', value: `${Math.round(totalFat)}ก/${goalFat}ก`, color: '#EF4444', icon: '💧', percent: Math.min(100, (totalFat / goalFat) * 100) || 0 },
+            { label: t('protein'), value: `${Math.round(totalProtein)}ก/${goalProtein}ก`, color: '#FF4E00', icon: '🍴', percent: Math.min(100, (totalProtein / goalProtein) * 100) || 0 },
+            { label: t('carbs'), value: `${Math.round(totalCarbs)}ก/${goalCarbs}ก`, color: '#FBBF24', icon: '🧬', percent: Math.min(100, (totalCarbs / goalCarbs) * 100) || 0 },
+            { label: t('fat'), value: `${Math.round(totalFat)}ก/${goalFat}ก`, color: '#EF4444', icon: '💧', percent: Math.min(100, (totalFat / goalFat) * 100) || 0 },
           ].map((macro) => (
             <div key={macro.label} className="bg-white p-4 rounded-3xl shadow-sm border border-gray-50 flex flex-col items-center">
               <span className="text-xl mb-2">{macro.icon}</span>
@@ -104,13 +100,13 @@ export const HomeView: React.FC = () => {
 
         {/* Recent Meals */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-900">มื้อล่าสุด</h2>
-          <button className="text-[#FF6B00] text-sm font-bold">ดูทั้งหมด</button>
+          <h2 className="text-lg font-bold text-gray-900">{t('recent_meals')}</h2>
+          <button className="text-[#FF6B00] text-sm font-bold">{t('see_all')}</button>
         </div>
 
         <div className="space-y-4">
           {meals.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">ยังไม่มีมื้ออาหาร สแกนเลย!</div>
+            <div className="text-center text-gray-400 py-8">{t('no_meals_yet')}</div>
           ) : meals.slice(0, 3).map((meal) => (
             <div key={meal.id} className="bg-white p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-50">
               <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
@@ -124,7 +120,7 @@ export const HomeView: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className="text-lg font-black text-gray-900 leading-none">{meal.calories}</p>
-                <p className="text-[10px] font-black text-gray-400 uppercase">แคล</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase">{t('cal_short')}</p>
               </div>
             </div>
           ))}

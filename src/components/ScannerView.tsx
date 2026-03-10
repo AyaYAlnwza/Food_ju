@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Camera, Image as ImageIcon, Zap, User, X, Loader2 } from 'lucide-react';
 import { analyzeFoodImage } from '../lib/gemini';
+import { useLanguage } from '../lib/LanguageContext';
 
 interface ScannerViewProps {
   onScan: (data: any) => void;
@@ -9,9 +10,13 @@ interface ScannerViewProps {
 }
 
 export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => {
+  const { t, language } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [isFlashOn, setIsFlashOn] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -20,6 +25,7 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' }
         });
+        setMediaStream(stream);
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -37,6 +43,50 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
     };
   }, []);
 
+  const toggleFlash = async () => {
+    if (!mediaStream) return;
+    const videoTrack = mediaStream.getVideoTracks()[0];
+    if (!videoTrack) return;
+
+    try {
+      // Check if browser supports torch (flash)
+      const capabilities = videoTrack.getCapabilities() as any;
+      if (capabilities.torch) {
+        const nextFlashState = !isFlashOn;
+        await videoTrack.applyConstraints({
+          advanced: [{ torch: nextFlashState } as any]
+        });
+        setIsFlashOn(nextFlashState);
+      } else {
+        alert(t('flash_not_supported') || 'Flash is not supported on this device.');
+      }
+    } catch (err) {
+      console.error("Error toggling flash:", err);
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsScanning(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64Image = e.target?.result as string;
+      try {
+        const result = await analyzeFoodImage(base64Image, language);
+        result.image = base64Image;
+        onScan(result);
+      } catch (error) {
+        console.error("Scan failed:", error);
+        alert(t('scan_failed'));
+      } finally {
+        setIsScanning(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const captureAndScan = async () => {
     if (!videoRef.current || !canvasRef.current || isScanning) return;
 
@@ -53,12 +103,12 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
       const base64Image = canvas.toDataURL('image/jpeg', 0.8);
 
       try {
-        const result = await analyzeFoodImage(base64Image);
+        const result = await analyzeFoodImage(base64Image, language);
         result.image = base64Image;
         onScan(result);
       } catch (error) {
         console.error("Scan failed:", error);
-        alert("ไม่สามารถวิเคราะห์รูปภาพได้ กรุณาลองใหม่อีกครั้ง");
+        alert(t('scan_failed'));
       } finally {
         setIsScanning(false);
       }
@@ -82,10 +132,7 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
         <button onClick={onClose} className="bg-[#FF6B00] p-2 rounded-xl active:scale-95 transition-transform">
           <X className="w-6 h-6 text-white" />
         </button>
-        <h1 className="text-white font-bold text-xl tracking-tight">NutriScan</h1>
-        <button className="bg-white/20 backdrop-blur-md p-2 rounded-full">
-          <User className="w-6 h-6 text-white" />
-        </button>
+        <h1 className="text-white font-bold text-xl tracking-tight absolute left-1/2 -translate-x-1/2">NutriScan</h1>
       </div>
 
       {/* Scanning Overlay */}
@@ -107,7 +154,7 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
               />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-[#FF6B00]/50 flex items-center gap-2">
                 <Loader2 className="w-4 h-4 text-[#FF6B00] animate-spin" />
-                <span className="text-white text-sm font-medium whitespace-nowrap">กำลังวิเคราะห์อาหาร...</span>
+                <span className="text-white text-sm font-medium whitespace-nowrap">{t('analyzing_food')}</span>
               </div>
             </>
           )}
@@ -116,9 +163,19 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
 
       {/* Controls */}
       <div className="absolute bottom-10 left-0 right-0 px-10 flex justify-between items-center z-20">
-        <button className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white">
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-transform"
+        >
           <ImageIcon className="w-6 h-6" />
         </button>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleImageUpload}
+          className="hidden"
+        />
 
         <button
           onClick={captureAndScan}
@@ -134,7 +191,10 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
           </div>
         </button>
 
-        <button className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white">
+        <button
+          onClick={toggleFlash}
+          className={`w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center text-white active:scale-95 transition-colors ${isFlashOn ? 'bg-[#FF6B00]' : 'bg-white/10'}`}
+        >
           <Zap className="w-6 h-6" />
         </button>
       </div>

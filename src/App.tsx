@@ -12,15 +12,40 @@ import { HistoryView } from './components/HistoryView';
 import { ProfileView } from './components/ProfileView';
 import { ScanResult } from './components/ScanResult';
 import { OnboardingView } from './components/OnboardingView';
+import { LanguageSelectorView } from './components/LanguageSelectorView';
+import { AuthView } from './components/AuthView';
 import { useNutrition } from './lib/NutritionContext';
+import { useLanguage } from './lib/LanguageContext';
+import { useAuth } from './lib/AuthContext';
+import { Activity } from 'lucide-react';
 
 type Screen = 'home' | 'scan' | 'history' | 'stats' | 'profile' | 'scan-result';
 
 export default function App() {
-  const { userProfile } = useNutrition();
+  const { user, loading: authLoading } = useAuth();
+  const { userProfile, loadingData } = useNutrition();
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<Screen>('home');
   const [previousTab, setPreviousTab] = useState<Screen>('home');
   const [scanData, setScanData] = useState<any>(null);
+
+  // If no language selected, show language selector instantly
+  if (!language) {
+    return <LanguageSelectorView />;
+  }
+
+  if (authLoading || (user && loadingData)) {
+    return (
+      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
+        <Activity className="w-10 h-10 text-[#FF6B00] animate-spin" />
+      </div>
+    );
+  }
+
+  // If not authenticated, show login/signup
+  if (!user) {
+    return <AuthView />;
+  }
 
   // If there's no user profile, force onboarding
   if (!userProfile) {

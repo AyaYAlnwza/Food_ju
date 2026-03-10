@@ -1,29 +1,61 @@
 import React, { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, Calendar } from 'lucide-react';
 import { useNutrition } from '../lib/NutritionContext';
+import { useLanguage } from '../lib/LanguageContext';
 
 export const HistoryView: React.FC = () => {
   const { meals } = useNutrition();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDate, setSelectedDate] = useState<string>('');
 
   const filteredMeals = useMemo(() => {
-    if (!searchQuery) return meals;
-    const lowerQuery = searchQuery.toLowerCase();
-    return meals.filter(meal =>
-      meal.name.toLowerCase().includes(lowerQuery) ||
-      meal.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
-    );
-  }, [meals, searchQuery]);
+    let result = meals;
+
+    if (selectedDate) {
+      // Parse "12 March 2026, 11:21" or similar formats into a comparable date string.
+      // For simplicity, we check if the meal.timestamp contains the formatted selectedDate.
+      // This assumes meals.timestamp is stored nicely, but typically native date pickers output YYYY-MM-DD.
+      // Let's create a rough date match by parsing the date natively.
+      const targetDate = new Date(selectedDate).toLocaleDateString();
+      result = result.filter(meal => {
+        const mealDate = new Date(meal.timestamp).toLocaleDateString();
+        return mealDate === targetDate;
+      });
+    }
+
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(meal =>
+        meal.name.toLowerCase().includes(lowerQuery) ||
+        meal.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    return result;
+  }, [meals, searchQuery, selectedDate]);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] pb-24">
       {/* Header */}
       <div className="bg-white px-6 pt-12 pb-6 flex items-center justify-between sticky top-0 z-10 border-b border-gray-100">
         <div className="w-10" /> {/* Spacer */}
-        <h1 className="text-xl font-bold text-gray-900">ประวัติการกิน</h1>
-        <button className="p-2 text-gray-900">
-          <Calendar className="w-6 h-6" />
-        </button>
+        <h1 className="text-xl font-bold text-gray-900">{t('meal_history')}</h1>
+        <div className="relative">
+          <button
+            className="p-2 text-gray-900"
+            onClick={() => (document.getElementById('history-date-picker') as HTMLInputElement)?.showPicker()}
+          >
+            <Calendar className="w-6 h-6" />
+          </button>
+          <input
+            type="date"
+            id="history-date-picker"
+            className="absolute right-0 top-full opacity-0 pointer-events-none w-0 h-0"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="px-6 mt-6">
@@ -36,7 +68,7 @@ export const HistoryView: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ค้นหาประวัติมื้ออาหาร"
+            placeholder={t('search_history')}
             className="w-full bg-white border border-gray-100 rounded-2xl py-4 pl-12 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF6B00]/20"
           />
           <div className="absolute inset-y-0 right-4 flex items-center">
@@ -44,11 +76,23 @@ export const HistoryView: React.FC = () => {
           </div>
         </div>
 
-        <h2 className="text-xs font-black tracking-widest text-gray-400 uppercase mb-4">อาหารที่สแกนล่าสุด</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-black tracking-widest text-gray-400 uppercase">
+            {selectedDate ? new Date(selectedDate).toLocaleDateString() : t('recent_scanned_food')}
+          </h2>
+          {selectedDate && (
+            <button
+              onClick={() => setSelectedDate('')}
+              className="text-xs font-bold text-[#FF6B00]"
+            >
+              {t('clear') || 'Clear Filter'}
+            </button>
+          )}
+        </div>
 
         <div className="space-y-4">
           {filteredMeals.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">ไม่พบมื้ออาหาร</div>
+            <div className="text-center text-gray-400 py-8">{t('no_meals_found')}</div>
           ) : filteredMeals.map((meal) => (
             <div key={meal.id} className="bg-white p-4 rounded-3xl flex items-center gap-4 shadow-sm border border-gray-50">
               <div className="w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
@@ -67,7 +111,7 @@ export const HistoryView: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className="text-xl font-black text-gray-900 leading-none">{meal.calories}</p>
-                <p className="text-[10px] font-black text-gray-400 uppercase">แคล</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase">{t('cal_short')}</p>
               </div>
             </div>
           ))}
