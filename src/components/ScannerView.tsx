@@ -1,25 +1,85 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Camera, Image as ImageIcon, Zap, User, X } from 'lucide-react';
+import { Camera, Image as ImageIcon, Zap, User, X, Loader2 } from 'lucide-react';
+import { analyzeFoodImage } from '../lib/gemini';
 
 interface ScannerViewProps {
-  onScan: () => void;
+  onScan: (data: any) => void;
+  onClose: () => void;
 }
 
-export const ScannerView: React.FC<ScannerViewProps> = ({ onScan }) => {
+export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  useEffect(() => {
+    let stream: MediaStream | null = null;
+    const startCamera = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' }
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+      }
+    };
+
+    startCamera();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const captureAndScan = async () => {
+    if (!videoRef.current || !canvasRef.current || isScanning) return;
+
+    setIsScanning(true);
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+
+      try {
+        const result = await analyzeFoodImage(base64Image);
+        result.image = base64Image;
+        onScan(result);
+      } catch (error) {
+        console.error("Scan failed:", error);
+        alert("ไม่สามารถวิเคราะห์รูปภาพได้ กรุณาลองใหม่อีกครั้ง");
+      } finally {
+        setIsScanning(false);
+      }
+    }
+  };
+
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden">
-      {/* Simulated Camera Background */}
-      <img
-        src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=1000"
-        alt="Food Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-80"
-        referrerPolicy="no-referrer"
+      {/* Real Camera Feed */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className="absolute inset-0 w-full h-full object-cover"
       />
+      <canvas ref={canvasRef} className="hidden" />
 
       {/* Header */}
       <div className="absolute top-12 left-0 right-0 px-6 flex justify-between items-center z-20">
-        <button className="bg-[#FF6B00] p-2 rounded-xl">
+        <button onClick={onClose} className="bg-[#FF6B00] p-2 rounded-xl active:scale-95 transition-transform">
           <X className="w-6 h-6 text-white" />
         </button>
         <h1 className="text-white font-bold text-xl tracking-tight">NutriScan</h1>
@@ -29,43 +89,28 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan }) => {
       </div>
 
       {/* Scanning Overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+      <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none">
         <div className="relative w-72 h-72">
           {/* Corners */}
           <div className="absolute top-0 left-0 w-12 h-12 border-t-4 border-l-4 border-[#FF6B00] rounded-tl-3xl" />
           <div className="absolute top-0 right-0 w-12 h-12 border-t-4 border-r-4 border-[#FF6B00] rounded-tr-3xl" />
           <div className="absolute bottom-0 left-0 w-12 h-12 border-b-4 border-l-4 border-[#FF6B00] rounded-bl-3xl" />
           <div className="absolute bottom-0 right-0 w-12 h-12 border-b-4 border-r-4 border-[#FF6B00] rounded-br-3xl" />
-          
-          {/* Scanning Line Animation */}
-          <motion.div
-            animate={{ top: ['0%', '100%', '0%'] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-            className="absolute left-0 right-0 h-1 bg-[#FF6B00]/50 shadow-[0_0_15px_#FF6B00]"
-          />
 
-          {/* Status Badge */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-            <span className="text-white text-sm font-medium whitespace-nowrap">Scanning for nutrition...</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Last Scan Preview */}
-      <div className="absolute bottom-32 left-6 right-6 z-20">
-        <div className="bg-black/40 backdrop-blur-xl border border-white/10 p-4 rounded-3xl flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl overflow-hidden bg-white">
-              <img src="https://em-content.zobj.net/source/apple/354/red-apple_1f34e.png" alt="Apple" className="w-full h-full object-contain p-1" />
-            </div>
-            <div>
-              <p className="text-white/60 text-xs font-medium">Last Scan</p>
-              <p className="text-white font-bold">Green Apple</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-[#FF6B00] font-bold text-lg">52 <span className="text-xs">kcal</span></p>
-          </div>
+          {/* Scanning Animation only when loading */}
+          {isScanning && (
+            <>
+              <motion.div
+                animate={{ top: ['0%', '100%', '0%'] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="absolute left-0 right-0 h-1 bg-[#FF6B00]/80 shadow-[0_0_15px_#FF6B00]"
+              />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-[#FF6B00]/50 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 text-[#FF6B00] animate-spin" />
+                <span className="text-white text-sm font-medium whitespace-nowrap">กำลังวิเคราะห์อาหาร...</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -74,26 +119,24 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan }) => {
         <button className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white">
           <ImageIcon className="w-6 h-6" />
         </button>
-        
-        <button 
-          onClick={onScan}
-          className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center group active:scale-95 transition-transform"
+
+        <button
+          onClick={captureAndScan}
+          disabled={isScanning}
+          className={`w-20 h-20 rounded-full border-4 flex items-center justify-center group transition-transform ${isScanning ? 'border-gray-500 scale-95 opacity-50' : 'border-white active:scale-95'}`}
         >
           <div className="w-16 h-16 rounded-full bg-[#FF6B00] flex items-center justify-center">
-            <Camera className="w-8 h-8 text-white" />
+            {isScanning ? (
+              <Loader2 className="w-8 h-8 text-white animate-spin" />
+            ) : (
+              <Camera className="w-8 h-8 text-white" />
+            )}
           </div>
         </button>
 
         <button className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white">
           <Zap className="w-6 h-6" />
         </button>
-      </div>
-
-      {/* Bottom Tabs (Visual only here) */}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-8 text-white/50 text-[10px] font-black tracking-widest uppercase">
-        <span className="text-[#FF6B00] border-b-2 border-[#FF6B00] pb-1">Scanner</span>
-        <span>Meal Log</span>
-        <span>Insights</span>
       </div>
     </div>
   );

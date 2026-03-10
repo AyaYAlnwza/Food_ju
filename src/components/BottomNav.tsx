@@ -9,11 +9,11 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'home', label: 'HOME', icon: Home },
-    { id: 'scan', label: 'SCAN', icon: Camera, isCenter: true },
-    { id: 'history', label: 'HISTORY', icon: History },
-    { id: 'stats', label: 'STATS', icon: BarChart3 },
-    { id: 'profile', label: 'PROFILE', icon: User },
+    { id: 'home', label: 'หน้าหลัก', icon: Home },
+    { id: 'scan', label: 'สแกน', icon: Camera, isCenter: true },
+    { id: 'history', label: 'ประวัติ', icon: History },
+    { id: 'stats', label: 'สถิติ', icon: BarChart3 },
+    { id: 'profile', label: 'โปรไฟล์', icon: User },
   ];
 
   return (

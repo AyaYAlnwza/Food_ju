@@ -11,19 +11,29 @@ import { ScannerView } from './components/ScannerView';
 import { HistoryView } from './components/HistoryView';
 import { ProfileView } from './components/ProfileView';
 import { ScanResult } from './components/ScanResult';
+import { OnboardingView } from './components/OnboardingView';
+import { useNutrition } from './lib/NutritionContext';
 
 type Screen = 'home' | 'scan' | 'history' | 'stats' | 'profile' | 'scan-result';
 
 export default function App() {
+  const { userProfile } = useNutrition();
   const [activeTab, setActiveTab] = useState<Screen>('home');
   const [previousTab, setPreviousTab] = useState<Screen>('home');
+  const [scanData, setScanData] = useState<any>(null);
+
+  // If there's no user profile, force onboarding
+  if (!userProfile) {
+    return <OnboardingView onComplete={() => { }} />;
+  }
 
   const handleTabChange = (tab: string) => {
     setPreviousTab(activeTab);
     setActiveTab(tab as Screen);
   };
 
-  const handleScan = () => {
+  const handleScan = (data: any) => {
+    setScanData(data);
     setActiveTab('scan-result');
   };
 
@@ -40,13 +50,13 @@ export default function App() {
       case 'home':
         return <HomeView />;
       case 'scan':
-        return <ScannerView onScan={handleScan} />;
+        return <ScannerView onScan={handleScan} onClose={() => setActiveTab('home')} />;
       case 'history':
         return <HistoryView />;
       case 'profile':
         return <ProfileView />;
       case 'scan-result':
-        return <ScanResult onBack={handleBackFromScan} onLog={handleLogMeal} />;
+        return <ScanResult data={scanData} onBack={handleBackFromScan} onLog={handleLogMeal} />;
       case 'stats':
         return <HomeView />; // Placeholder
       default:
