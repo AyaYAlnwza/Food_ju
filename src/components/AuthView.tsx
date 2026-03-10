@@ -26,7 +26,7 @@ export const AuthView: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] flex flex-col p-6 font-sans selection:bg-[#FF6B00]/30 border-8 border-gray-900 rounded-[3rem] overflow-hidden relative shadow-2xl w-full max-w-[400px] mx-auto h-[800px] my-4">
+        <div className="min-h-screen bg-[#F8F9FA] flex flex-col p-6 font-sans selection:bg-[#FF6B00]/30 relative w-full">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -47,7 +47,7 @@ export const AuthView: React.FC = () => {
                     <div className="w-16 h-16 bg-[#FF6B00] rounded-[1.5rem] flex items-center justify-center transform rotate-3 shadow-lg shadow-[#FF6B00]/20">
                         <Activity className="text-white w-10 h-10" />
                     </div>
-                    <span className="text-4xl font-bold font-display tracking-tight text-gray-900">NutriScan</span>
+                    <span className="text-4xl font-bold font-display tracking-tight text-gray-900">AHelp+</span>
                 </div>
 
                 <div className="bg-white p-8 rounded-[2rem] shadow-xl border border-gray-100 flex flex-col items-center">

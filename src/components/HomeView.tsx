@@ -27,7 +27,7 @@ export const HomeView: React.FC = () => {
     <div className="min-h-screen bg-[#F8F9FA] pb-24">
       {/* Header */}
       <div className="px-6 pt-12 pb-6 flex items-center justify-center">
-        <h1 className="text-xl font-bold text-gray-900">NutriScan</h1>
+        <h1 className="text-xl font-bold text-gray-900">AHelp+</h1>
       </div>
 
       <div className="px-6">

@@ -12,7 +12,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const translations: Record<Language, Record<string, string>> = {
     en: {
-        welcome: 'Welcome to NutriScan',
+        welcome: 'Welcome to AHelp+',
         choose_language: 'Choose Language',
         get_started: 'Get Started',
         login_google: 'Sign in with Google',
@@ -109,7 +109,7 @@ export const translations: Record<Language, Record<string, string>> = {
         female: 'female',
     },
     th: {
-        welcome: 'ยินดีต้อนรับสู่ NutriScan',
+        welcome: 'ยินดีต้อนรับสู่ AHelp+',
         choose_language: 'เลือกภาษา',
         get_started: 'เริ่มต้นใช้งาน',
         login_google: 'เข้าสู่ระบบด้วย Google',

@@ -7,7 +7,7 @@ export const LanguageSelectorView: React.FC = () => {
     const { setLanguage } = useLanguage();
 
     return (
-        <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 font-sans selection:bg-[#FF6B00]/30 border-8 border-gray-900 rounded-[3rem] overflow-hidden relative shadow-2xl w-full max-w-[400px] mx-auto h-[800px] my-4">
+        <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-6 font-sans selection:bg-[#FF6B00]/30 relative w-full">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

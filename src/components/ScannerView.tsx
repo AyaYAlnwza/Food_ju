@@ -132,7 +132,7 @@ export const ScannerView: React.FC<ScannerViewProps> = ({ onScan, onClose }) => 
         <button onClick={onClose} className="bg-[#FF6B00] p-2 rounded-xl active:scale-95 transition-transform">
           <X className="w-6 h-6 text-white" />
         </button>
-        <h1 className="text-white font-bold text-xl tracking-tight absolute left-1/2 -translate-x-1/2">NutriScan</h1>
+        <h1 className="text-white font-bold text-xl tracking-tight absolute left-1/2 -translate-x-1/2">AHelp+</h1>
       </div>
 
       {/* Scanning Overlay */}

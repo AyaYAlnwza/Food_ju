@@ -47,7 +47,7 @@ export const ProfileView: React.FC = () => {
     {
       section: t('usage'),
       items: [
-        { icon: CreditCard, label: t('active_package'), sub: 'NutriScan Gold (รายปี)', color: '#FF6B00' },
+        { icon: CreditCard, label: t('active_package'), sub: 'AHelp+ Gold (รายปี)', color: '#FF6B00' },
       ]
     },
     {
