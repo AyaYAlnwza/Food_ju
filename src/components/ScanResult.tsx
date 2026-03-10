@@ -32,7 +32,7 @@ export const ScanResult: React.FC<ScanResultProps> = ({ data, onBack, onLog }) =
         carbs: data.carbs || 0,
         fat: data.fat || 0,
         tags: data.tags || [],
-        timestamp: now.toLocaleString(),
+        timestamp: now.toISOString(),
         image: data.image || "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=1000",
         category,
       };

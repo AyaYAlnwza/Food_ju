@@ -7,8 +7,14 @@ export const HomeView: React.FC = () => {
   const { meals, dailyGoal } = useNutrition();
   const { t } = useLanguage();
 
-  const today = new Date().toLocaleDateString();
-  const todaysMeals = meals.filter(meal => new Date(meal.timestamp).toLocaleDateString() === today);
+  const today = new Date();
+  const todaysMeals = meals.filter(meal => {
+    const d = new Date(meal.timestamp);
+    if (isNaN(d.getTime())) return false;
+    return d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate();
+  });
 
   const totalCalories = todaysMeals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
   const totalProtein = todaysMeals.reduce((sum, meal) => sum + (meal.protein || 0), 0);
@@ -115,7 +121,10 @@ export const HomeView: React.FC = () => {
               <div className="flex-1">
                 <h3 className="font-bold text-gray-900 leading-tight">{meal.name}</h3>
                 <p className="text-xs text-gray-400 font-medium">
-                  {meal.category} • {new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {meal.category} • {(() => {
+                    const t = new Date(meal.timestamp);
+                    return isNaN(t.getTime()) ? '' : t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  })()}
                 </p>
               </div>
               <div className="text-right">

@@ -13,15 +13,20 @@ export const HistoryView: React.FC = () => {
     let result = meals;
 
     if (selectedDate) {
-      // Parse "12 March 2026, 11:21" or similar formats into a comparable date string.
-      // For simplicity, we check if the meal.timestamp contains the formatted selectedDate.
-      // This assumes meals.timestamp is stored nicely, but typically native date pickers output YYYY-MM-DD.
-      // Let's create a rough date match by parsing the date natively.
-      const targetDate = new Date(selectedDate).toLocaleDateString();
-      result = result.filter(meal => {
-        const mealDate = new Date(meal.timestamp).toLocaleDateString();
-        return mealDate === targetDate;
-      });
+      const parts = selectedDate.split('-');
+      if (parts.length === 3) {
+        const targetYear = parseInt(parts[0], 10);
+        const targetMonth = parseInt(parts[1], 10) - 1;
+        const targetDay = parseInt(parts[2], 10);
+
+        result = result.filter(meal => {
+          const d = new Date(meal.timestamp);
+          if (isNaN(d.getTime())) return false;
+          return d.getFullYear() === targetYear &&
+            d.getMonth() === targetMonth &&
+            d.getDate() === targetDay;
+        });
+      }
     }
 
     if (searchQuery) {
@@ -78,7 +83,10 @@ export const HistoryView: React.FC = () => {
 
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xs font-black tracking-widest text-gray-400 uppercase">
-            {selectedDate ? new Date(selectedDate).toLocaleDateString() : t('recent_scanned_food')}
+            {selectedDate ? (() => {
+              const [y, m, d] = selectedDate.split('-');
+              return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString();
+            })() : t('recent_scanned_food')}
           </h2>
           {selectedDate && (
             <button
@@ -107,7 +115,10 @@ export const HistoryView: React.FC = () => {
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 font-medium">{meal.timestamp}</p>
+                <p className="text-xs text-gray-400 font-medium">{(() => {
+                  const d = new Date(meal.timestamp);
+                  return isNaN(d.getTime()) ? meal.timestamp : d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+                })()}</p>
               </div>
               <div className="text-right">
                 <p className="text-xl font-black text-gray-900 leading-none">{meal.calories}</p>
